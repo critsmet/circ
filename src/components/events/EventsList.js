@@ -8,7 +8,7 @@ export default function EventsList(props){
 
   return (
     <div>
-      <div className={"event-list-date"}>{props.date.toUpperCase()}</div>
+      <div className={"tc green-bg f-blue f1-75 mt-5 mb-5"}>{props.date.toUpperCase()}</div>
       {props.events.map(event => <Event key={"event-" + event.data.id} event={event.data} />)}
     </div>
   )

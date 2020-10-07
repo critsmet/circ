@@ -59,8 +59,13 @@ body {
   }
 }
 
-/* Grid */
+/* Curoser */
 
+.hover-pointer:hover{
+  cursor: pointer;
+}
+
+/* Grid */
 
 .gutter {
   display: grid;
@@ -108,17 +113,18 @@ body {
   align-items: center;
 }
 
-/* Float */
-
-.fr {
-  float: right;
-}
-
 /* Border */
 
-.bor-d{
-  border-style: dashed;
-  border-width: thin;
+.border{
+  border: 1px solid ;
+}
+
+.border-b{
+  border-bottom: 1px solid #48EB97;
+}
+
+.border-r12{
+  border-radius: 12px;
 }
 
 /* Displays */
@@ -135,12 +141,20 @@ body {
 }
 /* Text Styling */
 
+.uppercase{
+  text-transform: uppercase;
+}
+
 .tc {
   text-align: center;
 }
 
 .tr {
   text-align: right;
+}
+
+.tj{
+  text-align: justify
 }
 
 .ow {
@@ -158,6 +172,14 @@ body {
   color: #E7040F;
 }
 
+.f-blue {
+  color: #0B0A21;
+}
+
+.f-1{
+  font-size: 1rem;
+}
+
 .f1-25{
   font-size: 1.25rem;
 }
@@ -170,7 +192,19 @@ body {
   font-size: 1.5rem;
 }
 
-/* Overflow */
+.f1-75{
+  font-size: 1.75rem;
+}
+
+.f2{
+  font-size: 2rem
+}
+
+/* Text Handling */
+
+.pre-wrap{
+  white-space: pre-wrap;
+}
 
 .scroll {
   white-space: nowrap;
@@ -211,8 +245,24 @@ body {
   margin-right: 1rem;
 }
 
+.p-5{
+  padding: .5rem;
+}
+
+.p1{
+  padding: 1rem;
+}
+
+.pt-1{
+  padding-top: 1%;
+}
+
 .pt1{
   padding-top: 1rem;
+}
+
+.pt5{
+  padding-top: 5rem;
 }
 
 .pb1{
@@ -261,8 +311,20 @@ body {
   width: 33%;
 }
 
+.w-40{
+  width: 40%;
+}
+
 .w-50 {
-  width: 65%;
+  width: 50%;
+}
+
+.w-60 {
+  width: 60%;
+}
+
+.w-70 {
+  width: 70%;
 }
 
 .w-75 {
@@ -351,26 +413,57 @@ body {
   height: 40%;
 }
 
+.h1{
+  height: 1rem;
+}
+
+.h2{
+  height: 2rem
+}
+
 .h-100 {
   height: 100%
 }
 
 /* --------------- Custom Input Styling ---------------------- */
 
-/* Inputs, Textareas, Selects, Labels, Etc. */
+/* Inputs, Textareas, Selects, Labels, Links, Etc. */
+
+a{
+  color: #48EB97
+}
 
 ::placeholder {
   color: #48EB97;
   font-size: 1.5rem;
 }
 
+input:disabled::-webkit-input-placeholder { /* WebKit browsers */
+    color: rgba(119, 150, 153, 1);
+}
+input:disabled:-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+    color: rgba(119, 150, 153, 1);
+}
+input:disabled::-moz-placeholder { /* Mozilla Firefox 19+ */
+    color: rgba(119, 150, 153, 1);
+}
+input:disabled:-ms-input-placeholder { /* Internet Explorer 10+ */
+    color: rgba(119, 150, 153, 1);
+}
+
 input[type="submit"]:disabled {
   cursor: not-allowed;
-  color: rgba(225, 87, 75, 1)
+  color: rgba(119, 150, 153, 1);
+  background-color: rgba(72, 235, 151, 0.1)
+  /* old red color: rgba(225, 87, 75, 1) */
+}
+
+input:disabled{
+  color: rgba(119, 150, 153, 1);
+  background-color: rgba(72, 235, 151, 0.1)
 }
 
 input, textarea, select {
-  background-color: #0B0A21;
   border: none;
   outline: none;
   color: #48EB97;
@@ -391,6 +484,7 @@ textarea {
 select {
   font-size: 1.5rem;
   margin: 0px .5rem 0px 0px;
+  text-transform: uppercase;
 }
 
 label {
@@ -399,16 +493,81 @@ label {
 }
 
 input[type="submit"]{
+  background-color: rgba(72, 235, 151, 1);
+  color: #0B0A21;
   cursor: pointer;
 }
 
-.muted-form-bg{
+.muted-green-bg{
   background-color: rgba(72, 235, 151, 0.225)
+}
+
+.green-bg{
+  background-color: rgba(72, 235, 151, 1);
+}
+
+.blue-bg{
+  background-color: #0B0A21;
 }
 
 .transp-bg{
   background-color: rgba(0, 0, 0, 0)
 }
+
+/* #nav-filter{
+  position: absolute;
+  z-index: 1;
+}
+
+#main-container{
+  position: relative;
+}
+
+.browse-menu-enter {
+	opacity: 0;
+}
+
+.browse-menu-enter-active {
+	opacity: 1;
+  transition: 400ms ease-in;
+}
+
+.browse-menu-enter-done {
+	opacity: 1;
+}
+
+.browse-menu-exit {
+	opacity: 1;
+}
+
+.browse-menu-exit-active {
+	opacity: 0;
+  transition: 150ms ease-in;
+}
+
+.push-down-enter {
+	top: 0px;
+}
+
+.push-down-enter-active {
+	top: 150px;
+  transition: 300ms ease-in;
+}
+
+.push-down-enter-done {
+  top: 150px;
+}
+
+.push-down-exit {
+  top: 150px;
+}
+
+.push-down-exit-active {
+	top: 0px;
+  transition: 300ms ease-in;
+} */
+
+
 
 /* Custom Inputs */
 
@@ -444,23 +603,33 @@ input[type="submit"]{
   background: transparent;
 }
 
+.nav-checkbox-custom {
+  position: absolute;
+  top: 1.25rem;
+  left: 4px;
+  height: 15px;
+  width: 15px;
+  border: 2px solid #48EB97;
+  background: transparent;
+}
+
 .checkmark:after {
   content: "";
   position: absolute;
   display: none;
 }
 
-.checkbox-custom:after {
+.checkbox-custom:after, .nav-checkbox-custom:after {
   content: "";
   position: absolute;
   display: none;
 }
 
-.checkbox-label input:checked ~ .checkbox-custom:after {
+.checkbox-label input:checked ~ .checkbox-custom:after, .checkbox-label input:checked ~ .nav-checkbox-custom:after {
   display: block;
 }
 
-.checkbox-label .checkbox-custom:after {
+.checkbox-label .checkbox-custom:after, .checkbox-label .nav-checkbox-custom:after {
   left: 5px;
   top: 1px;
   width: 3px;
@@ -498,10 +667,6 @@ input[type="submit"]{
 
 /* CSS that needs to be broken down into chunks and re-written in the app */
 
-a{
-  color: #48EB97
-}
-
 #location-form{
   position: absolute;
   top: 40%;
@@ -509,93 +674,4 @@ a{
   margin-right: -50%;
   transform: translate(-50%, -50%);
   text-align: center;
-}
-
-#message-display{
-  text-align:justify;
-  padding-top: 5rem;
-  font-size: 2rem;
-}
-
-#main-logo {
-  padding-top: 1%;
-}
-
-#main-logo:hover{
-  cursor: pointer;
-}
-
-#contribute{
-  float: right;
-}
-
-#contribute:hover{
-  cursor: pointer;
-}
-
-.event-description{
-  white-space: pre-wrap;
-}
-
-.event-list-name {
-  font-size: 1.25rem;
-}
-
-.event-list-location{
-  float: right;
-}
-
-.event-list-categories {
-    float: right;
-}
-
-.event-list-date {
-  text-align: center;
-  background-color: rgba(72, 235, 151, 1);
-  color: #0B0A21;
-  margin: 2% 0%;
-  font-size: 1.75rem;
-}
-
-.banner{
-  text-align: center;
-  color: #0B0A21;
-  background-color: rgba(72, 235, 151, 1);
-  font-size: 1rem;
-}
-
-
-.event-large{
-  border: 1px solid #48EB97;
-  padding: 10px;
-  margin-bottom: 10px;
-}
-
-.event-large-time{
-  float: right;
-  margin-left: 5px;
-  padding: 5px;
-  font-size: 1.33rem;
-  border-radius: 5px;
-}
-
-.event-large-category{
-  margin-right: 5px;
-  padding: 5px;
-  font-size: .85rem;
-  background-color: rgba(72, 235, 151, 0.225)
-}
-
-.event-large-tags{
-    float: right;
-}
-
-.event-large-tag{
-  margin-right: 5px;
-  padding: 2px;
-  font-size: .85rem;
-}
-
-.event-large-name{
-  font-size: 1.33rem;
 }

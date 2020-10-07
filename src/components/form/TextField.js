@@ -6,15 +6,17 @@ import { runOnChangeValidators, runAfterEntryValidators } from '../../helpers/va
 
 import { useDependencyResetRef } from '../../hooks/useDependencyResetRef'
 
-export default function TextField({ name='text', type="text", counter=false, limit=Infinity, placeholder='', onChangeValidators=[], afterEntryValidators=[], divClassNames='', inputClassNames='', counterSpanClassNames='', defaultValue='', continuous=false, resetDependencies=[]}){
+export default function TextField({ name='text', type="text", counter=false, limit=Infinity, placeholder='', onChangeValidators=[], afterEntryValidators=[], divClassNames='', inputClassNames='', counterSpanClassNames='', defaultValue='', continuous=false, resetDependencies=[], disabled=false}){
 
   const textareaRef = useRef(null)
   const {setState, state, useRegisterWithFormContext} = useContext(FormStoreContext)
   let value = state[name] ? state[name].value : defaultValue
   let errors = state[name] ? state[name].errors : []
-
   //highly recommend that default values some from previously approved inputs!
   useRegisterWithFormContext({defaultValue: value, name, defaultApproval: defaultValue !== ''})
+  console.log("VALUE", value, "DEFAULT", defaultValue);
+
+  useDependencyResetRef({setState, dependencies: resetDependencies, name})
 
   useEffect(() => {
     if (textareaRef.current){
@@ -24,6 +26,9 @@ export default function TextField({ name='text', type="text", counter=false, lim
     }
   }, [value]);
 
+  useEffect(() => {
+    defaultValue && setState({type: "UPDATE_STATE", name, payload: {value: defaultValue, approved: true}})
+  }, [defaultValue])
 
   const timeout = useRef(null)
 
@@ -83,6 +88,7 @@ export default function TextField({ name='text', type="text", counter=false, lim
     return(
       <div id={name + "-input-container"} className={divClassNames} style={counter ? containerGutterStyle : null}>
         <textarea
+          disabled={disabled}
           ref={textareaRef}
           id={name+"-input"}
           className={inputClassNames + (errors.length > 0 ? " field-with-errors" : "")}
@@ -101,6 +107,7 @@ export default function TextField({ name='text', type="text", counter=false, lim
     return(
       <div id={name + "-input-container"} className={divClassNames} style={counter ? containerGutterStyle : null}>
         <input
+          disabled={disabled}
           id={name+"-input"}
           className={inputClassNames + (errors.length > 0 ? " field-with-errors" : "")}
           type="text"

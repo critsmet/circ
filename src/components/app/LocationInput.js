@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { useHistory } from 'react-router-dom'
+import { useHistory, Link } from 'react-router-dom'
 
 import { Form } from "../form/FormStoreContext"
 
@@ -15,30 +15,37 @@ function LocationInput(){
   function handleSubmit(e, state){
     e.preventDefault()
     history.push(`/events?location=${state.location.value.replace(", ", "+")}`)
-
   }
+
   return (
+    <div>
       <Form render={state => {
         return (
-          <div id="location-form" className="w-40">
+          <div id="location-form" className="w-100 tc">
             <TextField
               name="location"
-              placeholder={"ENTER YOUR LOCATION"}
-              divClassNames="grow-1 mt1 mw300"
-              inputClassNames="w-100"
+              placeholder={"STREET ADDRESS, CITY, COUNTRY"}
+              divClassNames="mt1 w-100"
+              inputClassNames="w-40 mw325 tc"
               afterEntryValidators={[addressValidator]}
             />
             <br/>
+            <div className="h2">
             <input
               type="submit"
               onClick={(e) => handleSubmit(e, state)}
               value={"SEARCH EVENTS"}
               disabled={Object.values(state).find(obj => obj.errors.length > 0) || Object.values(state).find(obj => obj.approved === false)}
             />
+            <br/>
+            <br/>
+            <Link to="/events?location=online">or view online events</Link>
+            </div>
           </div>
         )
       }}
     />
+  </div>
   )
 }
 

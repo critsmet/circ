@@ -47,7 +47,7 @@ export default function EventShow({location, match}){
   } else {
     return (
       <div>
-        <div className={"event-list-date"}>{selectedEvent.data && formattedDate.toUpperCase()}</div>
+        <div className={"tc green-bg f-blue f1-75 mt-5 mb-5"}>{selectedEvent.data && formattedDate.toUpperCase()}</div>
         <Event event={selectedEvent.data} />
       </div>
     )

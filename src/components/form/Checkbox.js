@@ -8,14 +8,14 @@ export default function Checkbox({name='checkbox', labelText='', labelClassNames
   let value = state[name] ? state[name].value : defaultValue
   let approved = state[name] ? state[name].approved : !required
 
-  useRegisterWithFormContext({defaultValue: value, name, defaultApproval: approved})
+  useRegisterWithFormContext({defaultValue: value, name, defaultApproval: !required})
 
   useEffect(() => {
     defaultValue && setState({type: "UPDATE_STATE", name, payload: {value: defaultValue, approved: true}})
   }, [defaultValue])
 
   function handleOnChange(){
-    setState({type: "UPDATE_STATE", name, payload: {value: !value, approved: !approved}})
+    setState({type: "UPDATE_STATE", name, payload: {value: !value, approved: !required ? true : !approved}})
   }
 
   return (

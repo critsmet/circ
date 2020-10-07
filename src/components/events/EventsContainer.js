@@ -1,19 +1,21 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 
-import { BASE } from '../../index.js'
+import { useSelector, useDispatch } from 'react-redux'
+
+import { fetchEvents } from '../app/appMod'
 
 import EventsList from './EventsList'
 
-export default function EventsContainer(){
+export default function EventsContainer({location}){
 
-  const [daysOfEvents, setDaysOfEvents] = useState([])
+  const dispatch = useDispatch()
 
   useEffect(() => {
-    fetch(BASE + "/events")
-      .then(res => res.json())
-      .then(setDaysOfEvents)
-  }, [])
+    dispatch(fetchEvents(location.search))
+    dispatch({type: "UPDATE_SEARCH_PARAMS", payload: location.search})
+  }, [location.search])
 
+  const events = useSelector(state => state.events)
 
-  return <div>{daysOfEvents.map(day => <EventsList key={"events-"+day.date} date={day.date} events={day.events} />)}</div>
+  return <div>{events.map(day => <EventsList key={"events-"+day.date} date={day.date} events={day.events} />)}</div>
 }

@@ -11,7 +11,7 @@ let todayMonth = date.getMonth() + 1 //JavaScript returns .getMonth() values 0-1
 let todayDay = date.getDate()
 let todayHours = date.getHours()
 
-export default function TimeField({name='time', divClassNames='', minDay=todayDay, minMonth=todayMonth, minYear=todayYear, maxDay=null, maxMonth=null, maxYear=null, selectedDay=todayDay, selectedMonth=todayMonth, selectedYear=todayYear, defaultHour=todayHours, defaultMinute=0}){
+export default function TimeField({name='time', divClassNames='', labelText="Time", labelClassNames="", minDay=todayDay, minMonth=todayMonth, minYear=todayYear, maxDay=null, maxMonth=null, maxYear=null, selectedDay=todayDay, selectedMonth=todayMonth, selectedYear=todayYear, defaultHour=todayHours, defaultMinute=0}){
 
   const {setState, state, useRegisterWithFormContext} = useContext(FormStoreContext)
   let value = state[name] ? state[name].value : {hours: ((defaultHour === todayHours) && (todayHours === 23)) ? 0 : defaultHour, minutes: defaultMinute }

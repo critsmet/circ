@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react'
+import React, { useEffect } from 'react'
 
 import { useHistory } from 'react-router-dom';
+import { useSelector } from 'react-redux'
 
 import { BASE } from '../../index.js'
 
@@ -18,15 +19,8 @@ const nameAndEmailOnChangeValidators = [createInvalidStringValidator(['/>', '</'
 
 export default function EventForm({eventToBeEdited, setEvent}){
 
-  const [fetchedCategories, setCategories] = useState([])
-
   const history = useHistory()
-
-  useEffect(() => {
-    fetch(BASE + "/categories")
-      .then(res => res.json())
-      .then(categoriesArray => setCategories(categoriesArray.sort((a, b) => a.name.length < b.name.length ? -1 : 1)))
-  }, [])
+  const categories = useSelector(state => state.categories)
 
   let editEventObj
 
@@ -104,9 +98,9 @@ export default function EventForm({eventToBeEdited, setEvent}){
     <Form render={state => {
       console.log(editEventObj ? new Date(editEventObj.date).getDate() : undefined);
       return (
-        <form className="w-100 mt1">
+        <form className="w-100 mt1" onSubmit={(e) => handleSubmit(e, state)}>
         <div>
-          {editEventObj && <div className={"banner"}>{determineStatusMessage().toUpperCase()}</div>}
+          {editEventObj && <div className={"tc green-bg f-blue f1-75 mt-5 mb-5"}>{determineStatusMessage().toUpperCase()}</div>}
           <TextField
             name="name"
             defaultValue={editEventObj ? editEventObj.name : undefined}
@@ -189,17 +183,17 @@ export default function EventForm({eventToBeEdited, setEvent}){
               limit={2}
               name="categories"
               labelText="CATEGORIES"
-              divClassNames="f1-3 flex-row flex-wrap pb-5 muted-form-bg w-100"
+              divClassNames="f1-3 flex-row flex-wrap pb-5 muted-green-bg w-100"
               labelClassNames="checkbox-label mt-5 grow-1 mw150"
               checkboxClassNames="checkbox-custom"
-              collection={fetchedCategories}
+              collection={categories}
               counterSpanClassNames="f1-5"
               onChangeValidators={[createArrayLimit(5)]}
             />
           </div>
           <TagField
             defaultValue={editEventObj ? editEventObj.tags.map(tag => tag.name) : undefined}
-            divClassNames="scroll mt1 flex-row align-center no-wrap w-100 muted-form-bg"
+            divClassNames="scroll mt1 flex-row align-center no-wrap w-100 muted-green-bg"
             inputClassNames="grow-1 transp-bg"
             collectionClassNames="ilb pl-5"
             tagClassNames="tag"
@@ -235,14 +229,13 @@ export default function EventForm({eventToBeEdited, setEvent}){
               <input
                 type="submit"
                 value={editEventObj ? "EDIT" : "SUBMIT"}
-                onClick={(e) => handleSubmit(e, state)}
+
                 disabled={Object.values(state).find(obj => obj.errors.length > 0) || Object.values(state).find(obj => obj.approved === false)}
               />
             </div>
           </div>
         </form>
       )
-    }}>
-    </Form>
+    }}/>
   )
 }

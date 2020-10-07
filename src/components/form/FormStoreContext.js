@@ -1,13 +1,14 @@
 import React, { useReducer, useEffect } from 'react'
 
-import { formReducer, initialState, stateObjTemplate } from './formMod'
+import { formReducer, stateObjTemplate } from './formMod'
 
 export const FormStoreContext = React.createContext({state: null, function: () => {}})
 
 export const Form = ({render}) => {
-  const [state, setState] = useReducer(formReducer, initialState)
+  const [state, setState] = useReducer(formReducer, {})
 
   function useRegisterWithFormContext({name, defaultValue, defaultApproval}){
+
       useEffect(() => {
         //REGISTER FORM FIELD TO FORM STORE CONTEXT
         //We're adding an object to the state array being held in the FormStoreContext, which is keeping track of all inputs in the form

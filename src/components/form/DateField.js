@@ -10,7 +10,7 @@ let todayMonth = date.getMonth() + 1 //JavaScript returns .getMonth() values 0-1
 let todayDay = date.getDate()
 let todayHours = date.getHours()
 
-export default function DateField({name='date', defaultYear=todayYear, defaultMonth=todayMonth, defaultDay=todayDay, minYear=todayYear, minMonth=todayMonth, minDay=todayDay, maxYear=(todayYear + 1), maxMonth=12, maxDay=31, divClassNames=''}){
+export default function DateField({name='date', labelText="Day", labelClassNames="", defaultYear=todayYear, defaultMonth=todayMonth, defaultDay=todayDay, minYear=todayYear, minMonth=todayMonth, minDay=todayDay, maxYear=(todayYear + 1), maxMonth=12, maxDay=31, divClassNames=''}){
 
   const {setState, state, useRegisterWithFormContext} = useContext(FormStoreContext)
 
@@ -55,6 +55,8 @@ export default function DateField({name='date', defaultYear=todayYear, defaultMo
     let newDate = dateReconfigurer({changedValue, fieldName, ...validatorInfoObject, setState})
     setState({type: 'UPDATE_STATE', name, payload: {value: newDate, approved: true}})
   }
+
+  console.log(defaultDay, defaultYear, defaultMonth);
 
   return (
     <div className={divClassNames} id={name + "-date"}>

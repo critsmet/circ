@@ -263,7 +263,7 @@ export async function addressValidator({value, name}){
     let res = await fetch(`https://geocode.search.hereapi.com/v1/geocode?q=${formattedValue}&apiKey=VXDsAY_FhGDql7jAiw1u0oD6qNFuZm3_BpccIH89maQ`)
     let jsonObj = await res.json()
     console.log(jsonObj);
-    let address = jsonObj.items[0].address.label
+    let address = replaceKnownLocationErrors(jsonObj.items[0].address.label)
 
     if (jsonObj.items.length === 1){
       return {pass: true, changeValue: address, messages: []}
@@ -276,6 +276,10 @@ export async function addressValidator({value, name}){
     return {pass: false, changeValue: "", messages: ["GEOCODING ERROR, TRY AGAIN"]}
   }
 
+}
+
+export function replaceKnownLocationErrors(string){
+  return string.replace("CMX", "Ciudad de México")
 }
 
 export async function safeLinkValidator({value, name}){
