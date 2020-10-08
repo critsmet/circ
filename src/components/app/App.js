@@ -12,6 +12,7 @@ import EventForm from '../events/EventForm'
 import EventShow from '../events/EventShow'
 import MessageDisplay from '../misc/MessageDisplay'
 import LocationInput from './LocationInput'
+import Info from '../misc/Info'
 
 const App = () => {
 
@@ -24,21 +25,16 @@ const App = () => {
   return (
     <div id="app">
       <Nav showFilter={showFilter} setShowFilter={setShowFilter}/>
-      <CSSTransition
-        in={showFilter}
-        timeout={300}
-        classNames="push-down"
-        >
       <div id="main-container">
         <Switch>
           <Route exact path="/messages/:subject/:status" component={MessageDisplay} />
           <Route exact path="/add" component={EventForm} />
           <Route exact path="/events/:id" component={EventShow} />
           <Route exact path="/events" component={EventsContainer} />
+          <Route exact path="/info" component={Info}/>
           <Route path="/" component={LocationInput} />
         </Switch>
       </div>
-      </CSSTransition>
     </div>
   )
 }

@@ -46,11 +46,11 @@ export default function EventForm({eventToBeEdited, setEvent}){
     if (editEventObj.approved && !editEventObj.needs_review){
       return "This event has been approved and published"
     } else if (editEventObj.approved && editEventObj.needs_review){
-      return "This event has been published but recent changes will be reviewed"
+      return "This event is published but will be reviewed again"
     } else if (!editEventObj.approved && editEventObj.needs_review){
       return "This event still needs to be approved by moderators"
     } else if (!editEventObj.aproved && !editEventObj.needs_review){
-      return "This event was rejected, try making changes and submitting again"
+      return "This event was rejected, make changes and submit again"
     }
   }
 

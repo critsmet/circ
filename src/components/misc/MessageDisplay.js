@@ -19,7 +19,7 @@ export default function MessageDisplay({match}){
         }
       case 'submitted-event':
         if(status === "approved"){
-          return <> Your event has successfully been submitted, and is now waiting to be approved by our moderators. You will receive an e-mail confirmation once it has been approved, as well as a link you can use to edit the event if necessary. Contact us at contact@circular.events if you have any questions. <Link to="/">Click here</Link> to return to the main events page. </>
+          return <> Your event has successfully been submitted, and is now waiting to be approved by our moderators. You will receive an e-mail confirmation once it has been approved, as well as a link you can use to edit the event if necessary. Contact us at contact@circular.events if you have any questions. </>
         } else if (status === "rejected"){
           return <> There was a problem with our server that prevented your event from being submitted. Try again, and if the problem persists contact us at contact@circular.events so we can help you out. </>
         } else if (status === "email-confirmation-required"){

@@ -4,21 +4,25 @@ import { FormStoreContext } from './FormStoreContext'
 
 import { dayValidator, monthValidator, dateReconfigurer } from '../../helpers/validators'
 
-let date = new Date()
-let todayYear = date.getFullYear()
-let todayMonth = date.getMonth() + 1 //JavaScript returns .getMonth() values 0-11
-let todayDay = date.getDate()
-let todayHours = date.getHours()
+let today = new Date()
+let todayYear = today.getFullYear()
+let todayMonth = today.getMonth() + 1 //JavaScript returns .getMonth() values 0-11
+let todayDay = today.getDate()
+let todayHours = today.getHours()
 
 export default function DateField({name='date', labelText="Day", labelClassNames="", defaultYear=todayYear, defaultMonth=todayMonth, defaultDay=todayDay, minYear=todayYear, minMonth=todayMonth, minDay=todayDay, maxYear=(todayYear + 1), maxMonth=12, maxDay=31, divClassNames=''}){
 
   const {setState, state, useRegisterWithFormContext} = useContext(FormStoreContext)
 
-  let defaultValue = {}
+  //Important to have this useEffect above the if statement below that will change the day to the next day if today is the minimum day and it's 11PM
+  useEffect(() => {
+    setState({type: "UPDATE_STATE", name, payload: {value: {year: defaultYear, month: defaultMonth, day: defaultDay}, approved: true}})
+  }, [defaultYear, defaultMonth, defaultDay])
 
+  let defaultValue = {}
   //this function checks to see if the time is 23:00, in which case the default date displayed would have to be the next day if there's a minimum day
   if (todayHours === 23 && minDay === todayDay){
-    let nextDay = new Date(date.getTime() + (24 * 60 * 60 * 1000));
+    let nextDay = new Date(today.getTime() + (24 * 60 * 60 * 1000));
     let day = nextDay.getDate()
     let year = nextDay.getFullYear()
     let month = nextDay.getMonth() + 1
@@ -34,10 +38,6 @@ export default function DateField({name='date', labelText="Day", labelClassNames
   let disabledObj = {disabled: true}
 
   useRegisterWithFormContext({defaultValue: value, name, defaultApproval: true})
-
-  useEffect(() => {
-    setState({type: "UPDATE_STATE", name, payload: {value: {year: defaultYear, month: defaultMonth, day: defaultDay}, approved: true}})
-  }, [defaultYear, defaultMonth, defaultDay])
 
   function makeYearOptions(){
     let options = []

@@ -1,14 +1,16 @@
 import { BASE } from '../../index.js'
 
-export function appReducer(state = {categories: [], events: [], searchParams: ''}, action){
+export function appReducer(state = {loading: true, categories: [], events: [], searchParams: ''}, action){
   switch(action.type){
     case "ADD_CATEGORIES":
       return {...state, categories: action.payload}
     case "ADD_EVENTS":
-      return {...state, events: action.payload}
+      return {...state, loading: false, events: action.payload}
     case "UPDATE_SEARCH_PARAMS":
       console.log("UPDATING");
       return {...state, searchParams: action.payload}
+    case "LOADING_TRUE":
+      return {...state, loading: true}
     default:
       return state;
     }

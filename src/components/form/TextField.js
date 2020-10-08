@@ -6,14 +6,14 @@ import { runOnChangeValidators, runAfterEntryValidators } from '../../helpers/va
 
 import { useDependencyResetRef } from '../../hooks/useDependencyResetRef'
 
-export default function TextField({ name='text', type="text", counter=false, limit=Infinity, placeholder='', onChangeValidators=[], afterEntryValidators=[], divClassNames='', inputClassNames='', counterSpanClassNames='', defaultValue='', continuous=false, resetDependencies=[], disabled=false}){
+export default function TextField({ name='text', type="text", counter=false, limit=Infinity, placeholder='', onChangeValidators=[], afterEntryValidators=[], divClassNames='', inputClassNames='', counterSpanClassNames='', defaultValue='', continuous=false, resetDependencies=[], disabled=false, optional=false}){
 
   const textareaRef = useRef(null)
   const {setState, state, useRegisterWithFormContext} = useContext(FormStoreContext)
   let value = state[name] ? state[name].value : defaultValue
   let errors = state[name] ? state[name].errors : []
   //highly recommend that default values some from previously approved inputs!
-  useRegisterWithFormContext({defaultValue: value, name, defaultApproval: defaultValue !== ''})
+  useRegisterWithFormContext({defaultValue: value, name, defaultApproval: optional || defaultValue !== ''})
   console.log("VALUE", value, "DEFAULT", defaultValue);
 
   useDependencyResetRef({setState, dependencies: resetDependencies, name})
@@ -65,6 +65,7 @@ export default function TextField({ name='text', type="text", counter=false, lim
   }
 
   async function afterEntry({input, target}){
+    target.placeholder = placeholder
     if (input.trim().length > 0){
       let response = await runAfterEntryValidators({value, name, validators: afterEntryValidators})
       if (response.pass){
@@ -73,6 +74,8 @@ export default function TextField({ name='text', type="text", counter=false, lim
         setState({type: "UPDATE_STATE", name, payload: {value: '', approved: false, errors: response.errors}})
         target.placeholder = response.errors[0]
       }
+    } else if (optional){
+      setState({type: "UPDATE_STATE", name, payload: {approved: true, value: '', errors: []}})
     } else {
       setState({type: "UPDATE_STATE", name, payload: {approved: false, value: '', errors: ["NO INPUT"]}})
       target.placeholder = `PLEASE ENTER ${placeholder}`

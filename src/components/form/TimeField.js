@@ -4,12 +4,12 @@ import { hourValidator, timeValidator } from '../../helpers/validators'
 
 import { FormStoreContext } from './FormStoreContext'
 
-let date = new Date()
-let nextDay = new Date(date.getTime() + (24 * 60 * 60 * 1000));
-let todayYear = date.getFullYear()
-let todayMonth = date.getMonth() + 1 //JavaScript returns .getMonth() values 0-11
-let todayDay = date.getDate()
-let todayHours = date.getHours()
+const today = new Date()
+const tomorrow = new Date(today.getTime() + (24 * 60 * 60 * 1000));
+const todayYear = today.getFullYear()
+const todayMonth = today.getMonth() + 1 //JavaScript returns .getMonth() values 0-11
+const todayDay = today.getDate()
+const todayHours = today.getHours()
 
 export default function TimeField({name='time', divClassNames='', labelText="Time", labelClassNames="", minDay=todayDay, minMonth=todayMonth, minYear=todayYear, maxDay=null, maxMonth=null, maxYear=null, selectedDay=todayDay, selectedMonth=todayMonth, selectedYear=todayYear, defaultHour=todayHours, defaultMinute=0}){
 
@@ -29,9 +29,9 @@ export default function TimeField({name='time', divClassNames='', labelText="Tim
 
   function validateMinMaxValue(hrs){
     let hourIncrement = hrs
-    console.log("BEFORE LOOP", hrs, selectedDay);
-    while(!hourValidator({...validatorInfoObject, selectedDay: ((hours === todayHours) && (todayHours === 23)) ? nextDay.getDate() : selectedDay, selectedHour: hourIncrement}).pass){
-      console.log("IN LOOP", hrs, selectedDay);
+    console.log("BEFORE LOOP", "HOURS", hrs, "TODAY HOURS", todayHours, selectedDay);
+    while(!hourValidator({...validatorInfoObject, selectedDay: ((hours === 0) && (todayHours === 23)) ? tomorrow.getDate() : selectedDay, selectedHour: hourIncrement}).pass){
+      console.log("IN LOOP", hourIncrement, hrs, selectedDay);
       hourIncrement = hourIncrement === 23 ? 0 : hourIncrement + 1
     }
     return {hours: hourIncrement, minutes: 0}

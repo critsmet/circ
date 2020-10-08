@@ -1,6 +1,7 @@
 import React from 'react'
 
 import { useHistory, Link } from 'react-router-dom'
+import { useDispatch } from 'react-redux'
 
 import { Form } from "../form/FormStoreContext"
 
@@ -8,13 +9,23 @@ import TextField from '../form/TextField'
 
 import { addressValidator } from '../../helpers/validators'
 
+let date = new Date()
+let todayYear = date.getFullYear()
+let todayMonth = date.getMonth() + 1 //JavaScript returns .getMonth() values 0-11
+let todayDay = date.getDate()
+
 function LocationInput(){
 
   const history = useHistory()
+  const dispatch = useDispatch()
 
   function handleSubmit(e, state){
     e.preventDefault()
-    history.push(`/events?location=${state.location.value.replace(", ", "+")}`)
+    history.push(`/events?location=${state.location.value.replace(" ", "+")}&date=${todayYear}+${todayMonth}+${todayDay}&category=all`)
+  }
+
+  function handleClickViewOnline(){
+    history.push(`/events?location=online&date=${todayYear}+${todayMonth}+${todayDay}&category=all`)
   }
 
   return (
@@ -39,7 +50,7 @@ function LocationInput(){
             />
             <br/>
             <br/>
-            <Link to="/events?location=online">or view online events</Link>
+            <div className="hover-pointer" onClick={handleClickViewOnline}><u>or view online events</u></div>
             </div>
           </div>
         )

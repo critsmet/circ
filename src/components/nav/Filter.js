@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 
 import queryString from 'query-string'
 import { useHistory, useLocation } from 'react-router-dom';
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 
 import { addressValidator } from '../../helpers/validators'
 
@@ -14,13 +14,14 @@ import TextField from '../form/TextField'
 import DateField from '../form/DateField'
 import Dropdown from '../form/Dropdown'
 
-export default function Filter({ showFilter, setShowFilter }){
+export default function Filter({ setShowFilter }){
 
   const history = useHistory()
   const location = useLocation()
+  const dispatch = useDispatch()
   const searchParams = useSelector(state => state.searchParams)
   const categories = useSelector(state => state.categories)
-  const paramsObj = queryString.parse(location.search)
+  const paramsObj = queryString.parse(searchParams)
 
   return (
     <div id="nav-filter">
@@ -28,13 +29,22 @@ export default function Filter({ showFilter, setShowFilter }){
 
         function handleSubmit(e){
           e.preventDefault()
-          setShowFilter(!showFilter)
-          history.push(`/events?location=${state.online.value ? "online" : state.location.value.replace(", ", "+")}&date=${state.date.value.year}+${state.date.value.month}+${state.date.value.day}&category=${state.category.value}`)
+          setShowFilter(false)
+          let paramsArray = ['/events?']
+          console.log(state.location);
+          if (state.online.value){
+            paramsArray = paramsArray.concat(`location=online`)
+          } else if (state.location.value !== ""){
+            paramsArray = paramsArray.concat(`location=${state.location.value.replace(/\s/g, '+')}`)
+          }
+          paramsArray = paramsArray.concat(`date=${state.date.value.year}+${state.date.value.month}+${state.date.value.day}`)
+          paramsArray = paramsArray.concat(`category=${state.category.value === -1 ? "all" : categories.find(cat => cat.id === state.category.value).name.replace(/\s/g, '+')}`)
+          let firstTwoInParamsString = paramsArray.shift() + paramsArray.shift()
+          let paramsString = [firstTwoInParamsString, ...paramsArray].join("&")
+          history.push(paramsString)
         }
 
-
         function shouldBeDisabled(){
-          console.log(state);
           if (state.online && state.online.value){
             let stateCopy = {...state}
             delete stateCopy.location
@@ -46,8 +56,6 @@ export default function Filter({ showFilter, setShowFilter }){
           }
         }
 
-        console.log(paramsObj);
-
         return (
           <form onSubmit={handleSubmit}>
             <div className={"flex-row flex-wrap w-100 space-between align-center"}>
@@ -55,13 +63,16 @@ export default function Filter({ showFilter, setShowFilter }){
                 defaultValue={paramsObj.location ? paramsObj.location === "online" : undefined}
                 labelText="ONLINE EVENTS"
                 name="online"
-                labelClassNames="checkbox-label mr1 mt1 mw17"
+                labelClassNames="checkbox-label mr1 mw17"
                 checkboxClassNames="checkbox-custom"
                 optional={true}
               />
               <div className="mr1 ilb mw275">
                 <label>DAY</label>
                 <DateField
+                  minYear={2020}
+                  minMonth={1}
+                  minDay={1}
                   defaultDay={paramsObj.date ? parseInt(paramsObj.date.split(" ")[2]) : undefined}
                   defaultMonth={paramsObj.date ? parseInt(paramsObj.date.split(" ")[1]) : undefined}
                   defaultYear={paramsObj.date ? parseInt(paramsObj.date.split(" ")[0]) : undefined}
@@ -72,18 +83,19 @@ export default function Filter({ showFilter, setShowFilter }){
                 />
               </div>
               <Dropdown
-                defaultValue={paramsObj.category && categories.map(category => category.id).includes(parseInt(paramsObj.category)) ? parseInt(paramsObj.category) : undefined}
+                defaultValue={paramsObj.category && categories.map(category => category.name).includes(paramsObj.category) ? categories.find(cat => cat.name === paramsObj.category).id : -1}
                 name={"category"}
                 selectClassNames=""
                 placeholder={"SELECT A CATEGORY"}
-                collection={categories}
+                collection={[{id: -1, name: "all categories"}, ...categories]}
               />
             </div>
             <div className={"flex-row flex-wrap space-between align-center"}>
               <TextField
+                optional={true}
                 name="location"
                 defaultValue={paramsObj.location && paramsObj.location !== "online" ? paramsObj.location : undefined}
-                placeholder={(state.online && state.online.value) ? "SEARCHING ONLINE EVENTS" : "LOCATION" }
+                placeholder={(state.online && state.online.value) ? "SEARCHING ONLINE EVENTS" : "ADDRESS" }
                 divClassNames="w-70 ilb"
                 inputClassNames="w-100"
                 afterEntryValidators={[addressValidator]}
