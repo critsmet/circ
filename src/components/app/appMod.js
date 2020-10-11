@@ -7,7 +7,6 @@ export function appReducer(state = {loading: true, categories: [], events: [], s
     case "ADD_EVENTS":
       return {...state, loading: false, events: action.payload}
     case "UPDATE_SEARCH_PARAMS":
-      console.log("UPDATING");
       return {...state, searchParams: action.payload}
     case "LOADING_TRUE":
       return {...state, loading: true}

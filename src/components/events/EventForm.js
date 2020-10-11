@@ -1,11 +1,11 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 
 import { useHistory } from 'react-router-dom';
 import { useSelector } from 'react-redux'
 
 import { BASE } from '../../index.js'
 
-import { Form } from '../form/FormStoreContext'
+import { Form } from '../form/Form'
 import TextField from '../form/TextField'
 import Checkbox from '../form/Checkbox'
 import CheckboxCollection from '../form/CheckboxCollection'
@@ -13,35 +13,21 @@ import DateField from '../form/DateField'
 import TimeField from '../form/TimeField'
 import TagField from '../form/TagField'
 
-import {createInvalidStringValidator, createArrayLimit, emailValidator, createLengthValidator, linkValidator, safeLinkValidator, addressValidator} from '../../helpers/validators'
-
-const nameAndEmailOnChangeValidators = [createInvalidStringValidator(['/>', '</']), createLengthValidator(70)]
+import Validators from '../../helpers/validators'
 
 export default function EventForm({eventToBeEdited, setEvent}){
 
   const history = useHistory()
   const categories = useSelector(state => state.categories)
 
+  //This component is meant to be used for both creating and editing an event, so an eventToBeEdited argument may be passed in and the values of the event will be used as default values in the form via this editEventObj
   let editEventObj
-
   if (eventToBeEdited && eventToBeEdited.data){
-    let {data: {id, attributes: {name, approved, needs_review, date, description, online, address, tags, categories, creator_email}}} = eventToBeEdited
-
-    editEventObj = {
-      id,
-      name,
-      date,
-      description,
-      online,
-      address,
-      tags,
-      categories,
-      creator_email,
-      approved,
-      needs_review
-    }
+    let {data: {id, attributes}} = eventToBeEdited
+    editEventObj = {id, ...attributes}
   }
 
+  //These messages are displayed at the top of the form if an event is being edited
   function determineStatusMessage(){
     if (editEventObj.approved && !editEventObj.needs_review){
       return "This event has been approved and published"
@@ -77,7 +63,6 @@ export default function EventForm({eventToBeEdited, setEvent}){
     })
     .then(res => res.json())
     .then(res => {
-      console.log(res);
       if (res.status === 201 || res.status === 202){
         if (res.response === "E-mail already confirmed"){
           history.push("/messages/submitted-event/approved")
@@ -91,12 +76,15 @@ export default function EventForm({eventToBeEdited, setEvent}){
         history.push("/messages/submitted-event/denied")
       }
     })
-    .catch(console.log)
+    .catch((error) => {
+      console.log(error);
+      alert("There was an error submitting, please try again. If this error continues, email us at contact@circular.events")
+    })
   }
 
   return(
+    //This component is being composed using a "smart" Form component found in ../form/Form. All of the input fields are reusable custom components. View the README or comments in each component's file to learn how to use.
     <Form render={state => {
-      console.log(editEventObj ? new Date(editEventObj.date).getDate() : undefined);
       return (
         <form className="w-100 mt1" onSubmit={(e) => handleSubmit(e, state)}>
         <div>
@@ -109,14 +97,14 @@ export default function EventForm({eventToBeEdited, setEvent}){
             placeholder="EVENT NAME"
             counterSpanClassNames="f1-5"
             inputClassNames="w-100"
-            onChangeValidators={nameAndEmailOnChangeValidators}
+            onChangeValidators={[Validators.createInvalidStringValidator(['/>', '</']), Validators.createLengthValidator(70)]}
             divClassNames="mt1 w-100"
           />
           </div>
           <div className="gutter">
             <div className="flex-row flex-wrap space-between">
               <div className="mr1 ilb mw275 mt1">
-                <label>DAY</label>
+                <label>DATE</label>
                 <DateField
                   defaultDay={editEventObj ? new Date(editEventObj.date).getDate() : undefined}
                   defaultMonth={editEventObj ? new Date(editEventObj.date).getMonth() + 1 : undefined}
@@ -158,9 +146,9 @@ export default function EventForm({eventToBeEdited, setEvent}){
                 placeholder={state.online && state.online.value ? "EVENT LINK" : "ADDRESS"}
                 divClassNames="grow-1 mt1 mw300"
                 inputClassNames="w-100"
-                resetDependencies={state.online ?[state.online.value] : []}
-                onChangeValidators={[createInvalidStringValidator(['/>', '</'])]}
-                afterEntryValidators={state.online && state.online.value ? [linkValidator, safeLinkValidator] : [addressValidator] }
+                resetDependency={state.online ? state.online.value : false}
+                onChangeValidators={[Validators.createInvalidStringValidator(['/>', '</'])]}
+                afterEntryValidators={state.online && state.online.value ? [Validators.linkValidator, Validators.safeLinkValidator] : [Validators.addressValidator] }
               />
             </div>
           </div>
@@ -174,7 +162,7 @@ export default function EventForm({eventToBeEdited, setEvent}){
             inputClassNames="w-100"
             divClassNames="grow-1 mt1 mw300"
             counterSpanClassNames="f1-5"
-            onChangeValidators={[createLengthValidator(1500)]}
+            onChangeValidators={[Validators.createLengthValidator(1500)]}
           />
           <div className="mt1">
             <CheckboxCollection
@@ -188,10 +176,11 @@ export default function EventForm({eventToBeEdited, setEvent}){
               checkboxClassNames="checkbox-custom"
               collection={categories}
               counterSpanClassNames="f1-5"
-              onChangeValidators={[createArrayLimit(5)]}
+              onChangeValidators={[Validators.createArrayLimit(5)]}
             />
           </div>
           <TagField
+            placeholder="TAGS"
             defaultValue={editEventObj ? editEventObj.tags.map(tag => tag.name) : undefined}
             divClassNames="scroll mt1 flex-row align-center no-wrap w-100 muted-green-bg"
             inputClassNames="grow-1 transp-bg"
@@ -224,12 +213,11 @@ export default function EventForm({eventToBeEdited, setEvent}){
                 placeholder="E-MAIL"
                 counterSpanClassNames="f1-5"
                 divClassNames="mt1 w-75 ilb"
-                afterEntryValidators={[emailValidator]}
+                afterEntryValidators={[Validators.emailValidator]}
               />
               <input
                 type="submit"
                 value={editEventObj ? "EDIT" : "SUBMIT"}
-
                 disabled={Object.values(state).find(obj => obj.errors.length > 0) || Object.values(state).find(obj => obj.approved === false)}
               />
             </div>

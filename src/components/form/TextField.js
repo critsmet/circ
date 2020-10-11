@@ -1,23 +1,29 @@
-import React, { useContext, useEffect, useMemo, useRef } from 'react'
+import React, { useContext, useEffect, useRef } from 'react'
 
-import { FormStoreContext } from './FormStoreContext'
+import { FormStoreContext } from './Form'
 
-import { runOnChangeValidators, runAfterEntryValidators } from '../../helpers/validators'
+import Validators from '../../helpers/validators'
 
-import { useDependencyResetRef } from '../../hooks/useDependencyResetRef'
-
-export default function TextField({ name='text', type="text", counter=false, limit=Infinity, placeholder='', onChangeValidators=[], afterEntryValidators=[], divClassNames='', inputClassNames='', counterSpanClassNames='', defaultValue='', continuous=false, resetDependencies=[], disabled=false, optional=false}){
+export default function TextField({ name='text', type="text", counter=false, limit=Infinity, placeholder='', onChangeValidators=[], afterEntryValidators=[], divClassNames='', inputClassNames='', counterSpanClassNames='', defaultValue='', continuous=false, resetDependency=false, disabled=false, optional=false}){
 
   const textareaRef = useRef(null)
   const {setState, state, useRegisterWithFormContext} = useContext(FormStoreContext)
   let value = state[name] ? state[name].value : defaultValue
   let errors = state[name] ? state[name].errors : []
-  //highly recommend that default values some from previously approved inputs!
+
   useRegisterWithFormContext({defaultValue: value, name, defaultApproval: optional || defaultValue !== ''})
-  console.log("VALUE", value, "DEFAULT", defaultValue);
 
-  useDependencyResetRef({setState, dependencies: resetDependencies, name})
+  //The if the value of the optional resetDependency prop changes, it will clear the value of the text field
+  //This is a useful feature if, for example, this input input field was expected to hold the location of an event which could be either a physical address OR a URL (if the event were to be online).
+  //The expectated input (either physical address or URL) could be determined by another input field (a Checkbox asking "is the event online?", for example)
+  //Validators could also be conditionally passed in based on whether the input is expected to be a physical address or a URL (ie, <TextField resetDependency={state.online ? state.online.value : false} afterEntryValidators={state.eventIsOnline ? ...URL Validators : ...Address Validators})>.
+  //If a person were to enter in a physical address and it passed all the validations, but then they checked the Checkbox indicating that the event is actually going to be online and then accidentally submitting the event without adding in the URL, this would now hold incorrect data in the database and cause rendering problems.
+  //For this reason it's important to clear out the value so that a new value must be entered and go through any validators that may have been conditionally passed in specifically for it.
+  useEffect(() => {
+    setState({type: "UPDATE_STATE", name, payload: {value: '', approved: optional }})
+  }, [resetDependency])
 
+  //This useEffect hook adjusts the size of the field of entry if the input is a textfield (doesn't work on normal type="text" inputs)
   useEffect(() => {
     if (textareaRef.current){
       textareaRef.current.style.height = "100px";
@@ -56,7 +62,7 @@ export default function TextField({ name='text', type="text", counter=false, lim
 
   function handleOnChange(e){
     let text = e.target.value
-    let result = runOnChangeValidators({value: text, name, validators: onChangeValidators})
+    let result = Validators.runOnChangeValidators({value: text, name, validators: onChangeValidators})
     if (result.pass){
       setState({type: "UPDATE_STATE", name, payload: {value: text}})
     } else if (continuous){
@@ -67,7 +73,7 @@ export default function TextField({ name='text', type="text", counter=false, lim
   async function afterEntry({input, target}){
     target.placeholder = placeholder
     if (input.trim().length > 0){
-      let response = await runAfterEntryValidators({value, name, validators: afterEntryValidators})
+      let response = await Validators.runAfterEntryValidators({value, name, validators: afterEntryValidators})
       if (response.pass){
         setState({type: "UPDATE_STATE", name, payload: {value: response.changeValue ? response.changeValue : input, approved: true, errors: [] }})
       } else {

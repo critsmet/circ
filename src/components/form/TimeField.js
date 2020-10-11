@@ -1,8 +1,8 @@
 import React, { useContext, useEffect } from 'react'
 
-import { hourValidator, timeValidator } from '../../helpers/validators'
+import Validators from '../../helpers/validators'
 
-import { FormStoreContext } from './FormStoreContext'
+import { FormStoreContext } from './Form'
 
 const today = new Date()
 const tomorrow = new Date(today.getTime() + (24 * 60 * 60 * 1000));
@@ -19,28 +19,29 @@ export default function TimeField({name='time', divClassNames='', labelText="Tim
 
   useRegisterWithFormContext({defaultValue: value, name, defaultApproval: true})
 
+  //The TimeField component uses a validator that takes in the following information and determines if, given these parameters plus the hour in question (which is determined when the object is used below), if the hour should be selectable
   let validatorInfoObject= {selectedYear, minYear, selectedMonth, minMonth, selectedDay, minDay, maxYear, maxMonth, maxDay, selectedHour: hours, currentHour: todayHours}
 
-  useEffect(() => {
-      console.log("IN YEAR MONTH DAY USE EFFECT", selectedYear, minYear, selectedMonth, minMonth, selectedDay, minDay);
-      let validMinMaxTime = validateMinMaxValue(hours)
-      setState({type: 'UPDATE_STATE', name, payload: {value: validMinMaxTime}})
-    }, [selectedYear, selectedMonth, selectedDay])
-
+  //This function makes sure that, if there's a minimum time that can be selected, the option is always one hour ahead.
+  //It will also take in the minimum day, if given, and if the minimum day is now tomorrow because it's 11PM, it will make sure that the Hour select starts at midnight. 
   function validateMinMaxValue(hrs){
     let hourIncrement = hrs
-    console.log("BEFORE LOOP", "HOURS", hrs, "TODAY HOURS", todayHours, selectedDay);
-    while(!hourValidator({...validatorInfoObject, selectedDay: ((hours === 0) && (todayHours === 23)) ? tomorrow.getDate() : selectedDay, selectedHour: hourIncrement}).pass){
-      console.log("IN LOOP", hourIncrement, hrs, selectedDay);
+    while(!Validators.hourValidator({...validatorInfoObject, selectedDay: ((hours === 0) && (todayHours === 23)) ? tomorrow.getDate() : selectedDay, selectedHour: hourIncrement}).pass){
       hourIncrement = hourIncrement === 23 ? 0 : hourIncrement + 1
     }
     return {hours: hourIncrement, minutes: 0}
   }
 
+  useEffect(() => {
+    let validMinMaxTime = validateMinMaxValue(hours)
+    setState({type: 'UPDATE_STATE', name, payload: {value: validMinMaxTime}})
+  }, [selectedYear, selectedMonth, selectedDay])
+
+
   function handleOnChange(e){
     let changedValue = parseInt(e.target.value)
     let fieldName = e.target.name
-    let results = timeValidator({hours, minutes, [fieldName]: changedValue})
+    let results = Validators.timeValidator({hours, minutes, [fieldName]: changedValue})
     if (results.pass){
       setState({type: 'UPDATE_STATE', name, payload: {value: {...value, [fieldName]: changedValue}, approved: true}})
     }
@@ -49,7 +50,7 @@ export default function TimeField({name='time', divClassNames='', labelText="Tim
   return (
     <div className={divClassNames} id={name + "-time"}>
       <select name="hours" value={hours} onChange={handleOnChange}>
-        {Array.from(Array(24).keys()).map(num => <option key={num+"-hour-option"}{ ...!hourValidator({...validatorInfoObject, selectedHour: num}).pass && {disabled: true} } value={num}>{num < 10 ? "0" + num : num}</option>)}
+        {Array.from(Array(24).keys()).map(num => <option key={num+"-hour-option"}{ ...!Validators.hourValidator({...validatorInfoObject, selectedHour: num}).pass && {disabled: true} } value={num}>{num < 10 ? "0" + num : num}</option>)}
       </select>
       <select name="minutes" value={minutes} onChange={handleOnChange}>
         <option value="00">00</option>

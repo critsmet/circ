@@ -1,6 +1,6 @@
 import React, { useContext, useEffect } from 'react'
 
-import { FormStoreContext } from './FormStoreContext'
+import { FormStoreContext } from './Form'
 
 export default function Checkbox({name='checkbox', labelText='', labelClassNames='', checkboxClassNames='', defaultValue=false, required=false}){
 
@@ -9,7 +9,7 @@ export default function Checkbox({name='checkbox', labelText='', labelClassNames
   let approved = state[name] ? state[name].approved : !required
 
   useRegisterWithFormContext({defaultValue: value, name, defaultApproval: !required})
-
+  
   useEffect(() => {
     defaultValue && setState({type: "UPDATE_STATE", name, payload: {value: defaultValue, approved: true}})
   }, [defaultValue])

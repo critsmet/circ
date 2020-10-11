@@ -1,6 +1,6 @@
-//on change validators do not provide errors. the person changing the field will only be prevented from making an invalid change
-//therefor, the runOnChangeValidators method only returns true or false
-export function runOnChangeValidators({value, name, validators}){
+//On change validators do not provide errors. the person changing the field will only be prevented from making an invalid change.
+//Therefore, the runOnChangeValidators method only returns true or false.
+function runOnChangeValidators({value, name, validators}){
   let messages = []
   validators.forEach(validator => {
     let result = (validator({value, name}))
@@ -11,7 +11,9 @@ export function runOnChangeValidators({value, name, validators}){
   return {pass: messages.length > 0 ? false : true, errors: messages}
 }
 
-export async function runAfterEntryValidators({value, name, validators}){
+//This validator iterates over the array of validators passed in as an argument
+//These validators likely have some async functionality which is why async/await is used here
+async function runAfterEntryValidators({value, name, validators}){
   let messages = []
   let changeValue = null
 
@@ -28,7 +30,9 @@ export async function runAfterEntryValidators({value, name, validators}){
 
 }
 
-export function createInvalidStringValidator(array){
+//In order to keep the arguments passed in to the main validator the same, this validator "builder" takes in an argument that the principal validator will use.
+//It then returns a function that will accept the value and name of the inputs that will be passed in from within the component
+function createInvalidStringValidator(array){
   return (obj) => invalidStringValidator({...obj, array})
 }
 
@@ -46,7 +50,8 @@ function invalidStringValidator ({value, name, array}) {
   }
 }
 
-export function createLengthValidator(limit){
+//Another example of a validator "builder"
+function createLengthValidator(limit){
   return (obj) => lengthValidator({...obj, limit})
 }
 
@@ -60,29 +65,11 @@ function lengthValidator({value, limit, name}){
   }
 }
 
-export function createRequiredStringValidator({value, name, array}){
-  let messages = []
-  array.forEach(reqStr => {
-    if (value.includes(reqStr)){
-      messages.push(reqStr)
-    }
-  })
-  if (messages.length > 0){
-    if (messages.length > 1){
-      messages.splice((messages.length - 1), 0, ", and/or")
-      return `${name} field must include ${messages.join(" ")}`
-    }
-    return {pass: false, messages: messages}
-  } else {
-    return {pass: true, messages: [] }
-  }
-}
-
-export function yearValidator({minYear, maxYear, yearInQuestion}){
+function yearValidator({minYear, maxYear, yearInQuestion}){
   return (yearInQuestion >= minYear && yearInQuestion <= maxYear) ? {pass: true, messages: []} :  {pass: false, messages: ["Invalid year"]}
 }
 
-export function monthValidator({minYear, maxYear, selectedYear, minMonth, maxMonth, monthInQuestion}){
+function monthValidator({minYear, maxYear, selectedYear, minMonth, maxMonth, monthInQuestion}){
   if (monthInQuestion > 12 || monthInQuestion < 1){
     return {pass: false, messages: ["Invalid month"]}
   }
@@ -102,16 +89,17 @@ export function monthValidator({minYear, maxYear, selectedYear, minMonth, maxMon
   return {pass: true, messages: []}
 }
 
-export function dayValidator({minYear, maxYear, selectedYear, minMonth, maxMonth, selectedMonth, minDay, maxDay, dayInQuestion, selectedDay, hours}){
+function dayValidator({minYear, maxYear, selectedYear, minMonth, maxMonth, selectedMonth, minDay, maxDay, dayInQuestion, selectedDay, hours}){
   const thirty = [4, 6, 9, 11]
-  if (hours === 23 && dayInQuestion === selectedDay - 1){
-    return {pass: false, messages: ["Invalid day"]}
-  }
   if (minYear && minYear === selectedYear){
-    //the month has changed within this year
+    //the minimum year is the the selected year
     if(minMonth && minMonth === selectedMonth){
       //this month is the minimum month, meaning some of the days may have already passed
-      if(minDay && minDay > dayInQuestion){
+      if (hours === 23 && dayInQuestion === selectedDay - 1){
+        //it's 11 PM on the day before the minimum day so this day shouldn't pass
+        return {pass: false, messages: ["Invalid day"]}
+      }
+      else if(minDay && minDay > dayInQuestion){
         //today is the minimum day and any days before today should be disabled
         return {pass: false, messages: ["Invalid day"]}
       } else if (thirty.includes(selectedMonth)){
@@ -187,7 +175,34 @@ export function dayValidator({minYear, maxYear, selectedYear, minMonth, maxMonth
   return {pass: true, messages: []}
 }
 
-export function dateReconfigurer({changedValue, fieldName, minYear, maxYear, selectedYear, minMonth, maxMonth, selectedMonth, minDay, maxDay, selectedDay, setState}){
+function hourValidator({selectedYear, minYear, selectedMonth, minMonth, selectedDay, minDay, maxYear, maxMonth, maxDay, selectedHour, currentHour}){
+  if (selectedYear === minYear && selectedMonth === minMonth && selectedDay === minDay){
+    if (selectedHour <= currentHour){
+      return {pass: false, messages: ["Invalid hour"]}
+    }
+  } else if (selectedYear === maxYear && selectedMonth === maxMonth && selectedDay === maxDay){
+    if (selectedHour > currentHour){
+      return {pass: false, messages: ["Invalid hour"]}
+    }
+  }
+  return {pass: true, messages: []}
+}
+
+
+export function timeValidator({hours, minutes}){
+  if (hours > 23 || hours < 0){
+    return {pass: false, errors: ["Invalid hour"]}
+  } else if (minutes > 59 || minutes < 0){
+    return {pass: false, errors: ["Invalid hour"]}
+  } else {
+    return {pass: true, errors: []}
+  }
+}
+
+//The dateReconfigurer is a validator that corrects other date values if necessary.
+//For example, if the current selected date is March 30, 2020, and then the month value changes to February, well obviously February 30 is not a valid date, so the date reconfigurer will change the day to the first valid day for the month
+//This will then get ultimately set as the new value
+function dateReconfigurer({changedValue, fieldName, minYear, maxYear, selectedYear, minMonth, maxMonth, selectedMonth, minDay, maxDay, selectedDay, setState}){
   if (fieldName === "year"){
     //the year changed
     let configuredYear = changedValue
@@ -256,13 +271,15 @@ export function dateReconfigurer({changedValue, fieldName, minYear, maxYear, sel
     }
 }
 
-export async function addressValidator({value, name}){
+//This validator takes an address and sends it through the Here Geocoding API, which returns an array of matching items
+//Because we want specificity, only addresses that return one single match (we can expect that it's an *exact* match), should be considered a pass through the validator
+//The validator then returns this value to the component through the changeValue key in the object, so that the more specific address makes it to the DB
+async function addressValidator({value, name}){
   let formattedValue = value.replace(/\s/g, '+')
 
   try {
     let res = await fetch(`https://geocode.search.hereapi.com/v1/geocode?q=${formattedValue}&apiKey=VXDsAY_FhGDql7jAiw1u0oD6qNFuZm3_BpccIH89maQ`)
     let jsonObj = await res.json()
-    console.log(jsonObj);
     let address = replaceKnownLocationErrors(jsonObj.items[0].address.label)
 
     if (jsonObj.items.length === 1){
@@ -278,11 +295,12 @@ export async function addressValidator({value, name}){
 
 }
 
-export function replaceKnownLocationErrors(string){
+//Running list of known errors coming from the Geocoding API
+function replaceKnownLocationErrors(string){
   return string.replace("CMX", "Ciudad de México")
 }
 
-export async function safeLinkValidator({value, name}){
+async function safeLinkValidator({value, name}){
   try {
     let res = await fetch(`https://safebrowsing.googleapis.com/v4/threatMatches:find?key=AIzaSyCqNUCSLsvaVgNt-vsYkhZqwLxAtackbYY`, {
       method: "POST",
@@ -317,8 +335,8 @@ export async function safeLinkValidator({value, name}){
   }
 }
 
-export async function linkValidator({value, name}){
-
+//This validator simply makes a request to a URL and if it receives a response code of 200, it's cleared as a valid link
+async function linkValidator({value, name}){
   try{
     let res = await fetch(`https://cors-anywhere.herokuapp.com/${value}`)
     if (res.status === 200){
@@ -333,7 +351,7 @@ export async function linkValidator({value, name}){
   }
 }
 
-export function emailValidator({value, name}){
+function emailValidator({value, name}){
   const tester = /^[-!#$%&'*+0-9=?A-Z^_a-z`{|}~](\.?[-!#$%&'*+0-9=?A-Z^_a-z`{|}~])*@[a-zA-Z0-9](-*\.?[a-zA-Z0-9])*\.[a-zA-Z](-?[a-zA-Z0-9])+$/;
   const [account, address] = value.split('@');
   const domainParts = value.split('.');
@@ -355,12 +373,12 @@ export function emailValidator({value, name}){
   }
 }
 
-export function createArrayLimit(limit){
+//Another validator "builder"
+function createArrayLimit(limit){
   return (obj) => arrayLimit({...obj, limit})
 }
 
 function arrayLimit({value, name, limit}){
-  console.log(value, name, limit);
   if (value.length >= limit){
     return {pass: false, messages: [`Limit for ${name} field is ${limit}`]}
   } else {
@@ -368,25 +386,21 @@ function arrayLimit({value, name, limit}){
   }
 }
 
-export function hourValidator({selectedYear, minYear, selectedMonth, minMonth, selectedDay, minDay, maxYear, maxMonth, maxDay, selectedHour, currentHour}){
-  if (selectedYear === minYear && selectedMonth === minMonth && selectedDay === minDay){
-    if (selectedHour <= currentHour){
-      return {pass: false, messages: ["Invalid hour"]}
-    }
-  } else if (selectedYear === maxYear && selectedMonth === maxMonth && selectedDay === maxDay){
-    if (selectedHour > currentHour){
-      return {pass: false, messages: ["Invalid hour"]}
-    }
-  }
-  return {pass: true, messages: []}
-}
-
-export function timeValidator({hours, minutes}){
-  if (hours > 23 || hours < 0){
-    return {pass: false, errors: ["Invalid hour"]}
-  } else if (minutes > 59 || minutes < 0){
-    return {pass: false, errors: ["Invalid hour"]}
-  } else {
-    return {pass: true, errors: []}
-  }
+export default {
+  runOnChangeValidators,
+  runAfterEntryValidators,
+  createInvalidStringValidator,
+  createLengthValidator,
+  yearValidator,
+  monthValidator,
+  dayValidator,
+  dateReconfigurer,
+  addressValidator,
+  replaceKnownLocationErrors,
+  safeLinkValidator,
+  linkValidator,
+  emailValidator,
+  createArrayLimit,
+  hourValidator,
+  timeValidator
 }

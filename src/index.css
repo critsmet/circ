@@ -37,10 +37,6 @@ body {
   color: #48EB97;
 }
 
-#nav {
-  font-size: 3em;
-  position: sticky;
-}
 
 @media screen and (max-width: 980px){
   #app{
@@ -199,6 +195,10 @@ body {
 
 .f2{
   font-size: 2rem
+}
+
+.f3{
+  font-size: 3rem;
 }
 
 /* Text Handling */
@@ -669,6 +669,8 @@ input[type="submit"]{
 /* CSS that needs to be broken down into chunks and re-written in the app */
 
 #location-form{
+  width: 100%;
+  max-width: 980px;
   position: absolute;
   top: 40%;
   left: 50%;

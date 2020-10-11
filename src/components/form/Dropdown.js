@@ -1,6 +1,6 @@
 import React, { useContext, useEffect } from 'react'
 
-import { FormStoreContext } from './FormStoreContext'
+import { FormStoreContext } from './Form'
 
 export default function Dropdown({name='dropdown', placeholder="Select", divClassNames='', collection=[], defaultValue=0, selectClassNames=''}){
 
@@ -30,7 +30,6 @@ export default function Dropdown({name='dropdown', placeholder="Select", divClas
     }
   }
 
-  console.log(defaultValue);
   return (
     <div id={name+"checkbox-collection-container"}>
       <select value={value} className={selectClassNames} onChange={handleOnChange}>

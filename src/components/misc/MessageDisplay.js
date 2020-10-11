@@ -1,13 +1,12 @@
 import React from 'react'
 
-import { Link } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 
-export default function MessageDisplay({match}){
-  // Thanks for submitting your event to Circular. You'll receive an e-mail once it's been approved by one of our moderators. The message will include a link that you can use to make future edits to your event.
+export default function MessageDisplay(){
+
+  const { status, subject } = useParams()
 
   function renderMessage(){
-    let subject = match.params.subject
-    let status = match.params.status
     switch(subject){
       case 'email-confirmation':
         if (status === "approved"){
@@ -35,6 +34,7 @@ export default function MessageDisplay({match}){
         } else if (status === "pending"){
           return <>This event has not yet been approved.</>
         }
+        break;
       default:
         return <> This page does not exist </>
     }

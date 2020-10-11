@@ -1,8 +1,6 @@
 //This is the base reducer for forms using the Form component, a 'smart' form that uses React's Context API
-//Each input in the form will register itself with this reducer when the component mounts,
-//and will clear itself when it unmounts, essentially making the Form component and its context 100% reusable
-//This just makes the lives of coders easier so that we don't have to write reducers for every form we use.
-//the form will make it for itself
+//Each input in the form will register itself with this reducer when the component mounts, and will clear itself when it unmounts, essentially making the Form component and its context 100% reusable
+//This just makes the lives of coders easier so that we don't have to write reducers for every form we use; the form will make it for itself
 
 export const stateObjTemplate = {value: null, approved: false, errors: []}
 

@@ -1,6 +1,6 @@
 import React, { useContext, useEffect } from 'react'
 
-import { FormStoreContext } from './FormStoreContext'
+import { FormStoreContext } from './Form'
 
 export default function CheckboxCollection({name='select', labelText="", divClassNames='', collection=[], defaultValue=[], labelClassNames='', checkboxClassNames='', counterSpanClassNames='', limit=Infinity, counter=false, required=false}){
 

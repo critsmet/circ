@@ -1,32 +1,20 @@
 import React from 'react'
 
-import queryString from 'query-string'
-import { Link, useHistory  } from 'react-router-dom'
-import { useDispatch, useSelector } from 'react-redux'
+import { Link, useHistory, useLocation } from 'react-router-dom'
 
 export default function Event({event}){
 
   const history = useHistory()
-  const dispatch = useDispatch()
-  const searchParams = useSelector(state => state.searchParams)
-  const queryParams = queryString.parse(searchParams)
+  const location = useLocation()
+  const urlSearchParams = new URLSearchParams(location.search);
 
   function changeCategory(categoryName){
-    let paramsArray = ['/events?']
-    if (queryParams.location){
-      paramsArray = paramsArray.concat(`location=${queryParams.location.replace(/\s/g, '+')}`)
-    }
-    if (queryParams.date){
-      console.log(queryParams.date, queryParams.date.replace(/\s/g, '+'));
-      paramsArray = paramsArray.concat(`date=${queryParams.date.replace(/\s/g, '+')}`)
-    }
-    paramsArray = paramsArray.concat(`category=${categoryName.replace(/\s/g, '+')}`)
-    let firstTwoInParamsString = paramsArray.shift() + paramsArray.shift()
-    let paramsString = [firstTwoInParamsString, ...paramsArray].join("&")
-    console.log(queryParams, paramsString);
-    history.push(paramsString)
+    urlSearchParams.set("category", categoryName)
+    history.push(`/events?${urlSearchParams.toString()}`)
   }
 
+  //This component is not only used for the 'list' view of events (EventsList component), in which iteration would guarantee that an event is passed into this component, we are also using it for the 'show view' (EventShow component)
+  //Because the show view requires an aysnchronous request to fetch the individual event, we need to use conditional rendering to prevent the app from crashing
   if (event){
     const { id, attributes: { name, description, categories, time, tags, address } } = event
     return (
