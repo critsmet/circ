@@ -1,29 +1,31 @@
 import React, { useContext, useEffect, useRef } from 'react'
 
-import { FormStoreContext } from './Form'
+import { FormContext } from './Form'
 
 import Validators from '../../helpers/validators'
 
-export default function TextField({ name='text', type="text", counter=false, limit=Infinity, placeholder='', onChangeValidators=[], afterEntryValidators=[], divClassNames='', inputClassNames='', counterSpanClassNames='', defaultValue='', continuous=false, resetDependency=false, disabled=false, optional=false}){
+export default function TextField({ name='text', type="text", counter=false, limit=Infinity, placeholder='', onChangeValidators=[], afterEntryValidators=[], afterEntryValidatorsTimeout=750, divClassNames='', inputClassNames='', counterSpanClassNames='', defaultValue='', continuous=false, resetDependency=false, disabled=false, required=true}){
 
-  const textareaRef = useRef(null)
-  const {setState, state, useRegisterWithFormContext} = useContext(FormStoreContext)
+  const {setState, state, useRegisterWithFormContext} = useContext(FormContext)
   let value = state[name] ? state[name].value : defaultValue
   let errors = state[name] ? state[name].errors : []
 
-  useRegisterWithFormContext({defaultValue: value, name, defaultApproval: optional || defaultValue !== ''})
+  useRegisterWithFormContext({defaultValue: value, name, defaultApproval: !required || defaultValue !== ''})
 
-  //The if the value of the optional resetDependency prop changes, it will clear the value of the text field
-  //This is a useful feature if, for example, this input input field was expected to hold the location of an event which could be either a physical address OR a URL (if the event were to be online).
-  //The expectated input (either physical address or URL) could be determined by another input field (a Checkbox asking "is the event online?", for example)
-  //Validators could also be conditionally passed in based on whether the input is expected to be a physical address or a URL (ie, <TextField resetDependency={state.online ? state.online.value : false} afterEntryValidators={state.eventIsOnline ? ...URL Validators : ...Address Validators})>.
-  //If a person were to enter in a physical address and it passed all the validations, but then they checked the Checkbox indicating that the event is actually going to be online and then accidentally submitting the event without adding in the URL, this would now hold incorrect data in the database and cause rendering problems.
-  //For this reason it's important to clear out the value so that a new value must be entered and go through any validators that may have been conditionally passed in specifically for it.
+  //If the value of the required resetDependency prop changes, it will clear the value of the text field
   useEffect(() => {
-    setState({type: "UPDATE_STATE", name, payload: {value: '', approved: optional }})
+    setState({type: "UPDATE_STATE", name, payload: {value: '', approved: !required }})
   }, [resetDependency])
 
-  //This useEffect hook adjusts the size of the field of entry if the input is a textfield (doesn't work on normal type="text" inputs)
+  //The following useEffect needs to go below the one above because hooks run in order and the value of the reset dependency might change when a default value comes in for whatever that dependency represents
+  //This would clear the value of the default text after it has been loaded
+  useEffect(() => {
+    defaultValue !== '' && setState({type: "UPDATE_STATE", name, payload: {value: defaultValue, approved: true}})
+  }, [defaultValue])
+
+  //This textareaRef is used by the useEffect hook to adjust the size of the field of entry if the input is a textfield (doesn't work on normal type="text" inputs)
+  //ie if the text being inputted becomes "higher" than the textfield itself, the textfield will expand to adjust
+  const textareaRef = useRef(null)
   useEffect(() => {
     if (textareaRef.current){
       textareaRef.current.style.height = "100px";
@@ -32,25 +34,12 @@ export default function TextField({ name='text', type="text", counter=false, lim
     }
   }, [value]);
 
-  useEffect(() => {
-    defaultValue && setState({type: "UPDATE_STATE", name, payload: {value: defaultValue, approved: true}})
-  }, [defaultValue])
-
-  const timeout = useRef(null)
-
-  function handleAfterEntry(e){
-    clearTimeout(timeout.current)
-    let target = e.target
-    let input = target.value
-    timeout.current = setTimeout(function() {
-      afterEntry({input, target})
-    }, 750);
-  }
-
   function renderCharCounter(){
+    //Remove line breaks from character count
     let lineBreaks = value.match(/$/mg).length
     let trueLength = value.length
     if (type === "textarea"){
+      //Line breaks are worth 100 characters
       trueLength = lineBreaks === 1 ? trueLength : (lineBreaks - 1) * 100 + value.length
     }
     return (
@@ -70,19 +59,39 @@ export default function TextField({ name='text', type="text", counter=false, lim
     }
   }
 
+  //This ref is used to store the id of the current setTimeout, which gets reset on every keyUp
+  //After 3/4 of a second, the 'afterEntry' function runs the validators in the 'afterEntryValidators' array
+  const timeout = useRef(null)
+
+  function handleAfterEntry(e){
+    clearTimeout(timeout.current)
+    let target = e.target
+    let input = target.value
+    timeout.current = setTimeout(function() {
+      afterEntry({input, target})
+    }, afterEntryValidatorsTimeout);
+  }
+
+  //This is an aysnc function because the 'afterEntryValidators' usually make async requests
   async function afterEntry({input, target}){
     target.placeholder = placeholder
+    //Makes sure that the validators don't run just for empty spaces
     if (input.trim().length > 0){
       let response = await Validators.runAfterEntryValidators({value, name, validators: afterEntryValidators})
       if (response.pass){
+        //The response from the 'runAfterEntryValidators' method can return a value that it would like to reset the value to in state
+        //One example would be for geocoding; if someone types in an address that's lacking data that the geocoding service can provide, that might be the better option to store in the state, rather than the incomplete value originally inputted
         setState({type: "UPDATE_STATE", name, payload: {value: response.changeValue ? response.changeValue : input, approved: true, errors: [] }})
       } else {
+        //If the input does not pass all of the validators in the 'runAfterEntryValidators' array, the value is reset to an empty string and the placeholder value becomes the value of the first error
         setState({type: "UPDATE_STATE", name, payload: {value: '', approved: false, errors: response.errors}})
         target.placeholder = response.errors[0]
       }
-    } else if (optional){
+    } else if (required === false){
+      //If the input is not required, reset the value even if just a space is entered
       setState({type: "UPDATE_STATE", name, payload: {approved: true, value: '', errors: []}})
     } else {
+      //If the input is required, reset the space value and show an error in the placeholder
       setState({type: "UPDATE_STATE", name, payload: {approved: false, value: '', errors: ["NO INPUT"]}})
       target.placeholder = `PLEASE ENTER ${placeholder}`
     }
@@ -107,6 +116,7 @@ export default function TextField({ name='text', type="text", counter=false, lim
           placeholder={placeholder}
           onChange={handleOnChange}
           onKeyUp={handleAfterEntry}
+          onBlur={handleAfterEntry}
           value={value}
         />
         {(counter && renderCharCounter())}
@@ -125,6 +135,7 @@ export default function TextField({ name='text', type="text", counter=false, lim
           placeholder={placeholder}
           onChange={handleOnChange}
           onKeyUp={handleAfterEntry}
+          onBlur={handleAfterEntry}
           value={value}
         />
         {(counter && renderCharCounter())}
@@ -132,6 +143,3 @@ export default function TextField({ name='text', type="text", counter=false, lim
     )
   }
 }
-
-//FUTURE COMPONENT DEVELOPMENT
-//1. The ability to turn off textarea resizing if you want

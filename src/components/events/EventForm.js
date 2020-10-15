@@ -51,7 +51,7 @@ export default function EventForm({eventToBeEdited, setEvent}){
       address: state.address.value,
       tag_names: state.tags.value,
       creator_email: state.email.value,
-      category_ids: state.categories.value
+      category_ids: state.categories.value,
     }
 
     fetch(BASE + (editEventObj ? `/events/${editEventObj.id}` : "/events"), {
@@ -85,6 +85,25 @@ export default function EventForm({eventToBeEdited, setEvent}){
   return(
     //This component is being composed using a "smart" Form component found in ../form/Form. All of the input fields are reusable custom components. View the README or comments in each component's file to learn how to use.
     <Form render={state => {
+
+      function renderAddressForTimeZoneInput(){
+        return(
+          <div className="gutter">
+            <div className="flex-row flex-wrap">
+              <TextField
+                name="timezone-address"
+                defaultValue={editEventObj ? editEventObj.address : undefined}
+                placeholder={"ADDRESS FOR TIME ZONE"}
+                divClassNames="grow-1 mt1 mw300"
+                inputClassNames="w-100"
+                onChangeValidators={[Validators.createInvalidStringValidator(['/>', '</'])]}
+                afterEntryValidators={[Validators.addressValidator]}
+              />
+            </div>
+          </div>
+        )
+      }
+
       return (
         <form className="w-100 mt1" onSubmit={(e) => handleSubmit(e, state)}>
         <div>
@@ -130,8 +149,9 @@ export default function EventForm({eventToBeEdited, setEvent}){
                 />
               </div>
               <Checkbox
+                required={false}
                 defaultValue={editEventObj ? editEventObj.online : undefined}
-                labelText="ONLINE EVENT"
+                containerLabelText="ONLINE EVENT"
                 name="online"
                 labelClassNames="checkbox-label mr1 mt1 mw17"
                 checkboxClassNames="checkbox-custom"
@@ -139,19 +159,20 @@ export default function EventForm({eventToBeEdited, setEvent}){
             </div>
           </div>
           <div className="gutter">
-            <div className="flex-row flex-wrap">
-              <TextField
-                name="address"
-                defaultValue={editEventObj ? editEventObj.address : undefined}
-                placeholder={state.online && state.online.value ? "EVENT LINK" : "ADDRESS"}
-                divClassNames="grow-1 mt1 mw300"
-                inputClassNames="w-100"
-                resetDependency={state.online ? state.online.value : false}
-                onChangeValidators={[Validators.createInvalidStringValidator(['/>', '</'])]}
-                afterEntryValidators={state.online && state.online.value ? [Validators.linkValidator, Validators.safeLinkValidator] : [Validators.addressValidator] }
-              />
+              <div className="flex-row flex-wrap">
+                <TextField
+                  name="address"
+                  defaultValue={editEventObj ? editEventObj.address : undefined}
+                  placeholder={state.online && state.online.value ? "EVENT LINK" : "ADDRESS"}
+                  divClassNames="grow-1 mt1 mw300"
+                  inputClassNames="w-100"
+                  resetDependency={state.online ? state.online.value : false}
+                  onChangeValidators={[Validators.createInvalidStringValidator(['/>', '</'])]}
+                  afterEntryValidators={state.online && state.online.value ? [Validators.linkValidator, Validators.safeLinkValidator] : [Validators.addressValidator] }
+                />
+              </div>
             </div>
-          </div>
+          {state.online && state.online.value ? renderAddressForTimeZoneInput() : null}
           <TextField
             type="textarea"
             name="description"
@@ -179,22 +200,11 @@ export default function EventForm({eventToBeEdited, setEvent}){
               onChangeValidators={[Validators.createArrayLimit(5)]}
             />
           </div>
-          <TagField
-            placeholder="TAGS"
-            defaultValue={editEventObj ? editEventObj.tags.map(tag => tag.name) : undefined}
-            divClassNames="scroll mt1 flex-row align-center no-wrap w-100 muted-green-bg"
-            inputClassNames="grow-1 transp-bg"
-            collectionClassNames="ilb pl-5"
-            tagClassNames="tag"
-            counter={true}
-            limit={3}
-            counterSpanClassNames="f1-5 mt1"
-          />
           <div className="gutter">
             <div className="flex-row flex-wrap space-between align-center">
               <div className="ilb mt1 f1-5">REVIEW COMMUNITY GUIDELINES ↓</div>
               <Checkbox
-                labelText="I ACCEPT THE GUIDELINES"
+                containerLabelText="I ACCEPT THE GUIDELINES"
                 name="guidelines"
                 labelClassNames="checkbox-label mt1"
                 checkboxClassNames="checkbox-custom"
@@ -227,3 +237,17 @@ export default function EventForm({eventToBeEdited, setEvent}){
     }}/>
   )
 }
+
+//Haven't quite integrated tags the way I'd like to yet but have the code written out for it
+// <TagField
+//   placeholder="TAGS"
+//   required={false}
+//   defaultValue={editEventObj ? editEventObj.tags.map(tag => tag.name) : undefined}
+//   divClassNames="scroll mt1 flex-row align-center no-wrap w-100 muted-green-bg"
+//   inputClassNames="grow-1 transp-bg"
+//   collectionClassNames="ilb pl-5"
+//   tagClassNames="tag"
+//   counter={true}
+//   limit={3}
+//   counterSpanClassNames="f1-5 mt1"
+// />

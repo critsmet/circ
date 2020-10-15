@@ -2,9 +2,9 @@ import React, { useReducer, useEffect } from 'react'
 
 import { formReducer, stateObjTemplate } from './formMod'
 
-export const FormStoreContext = React.createContext({state: null, function: () => {}})
+export const FormContext = React.createContext({state: null, function: () => {}})
 
-//Reference the README in this folder for more information on using this 'smart' From component and the components that work with it 
+//Reference the README in this folder for more information on using this 'smart' From component and the components that work with it
 export const Form = ({render}) => {
   const [state, setState] = useReducer(formReducer, {})
 
@@ -23,8 +23,8 @@ export const Form = ({render}) => {
   }
 
   return (
-    <FormStoreContext.Provider value={{state, setState, useRegisterWithFormContext}}>
+    <FormContext.Provider value={{state, setState, useRegisterWithFormContext}}>
       {render(state)}
-    </FormStoreContext.Provider>
+    </FormContext.Provider>
   )
 }

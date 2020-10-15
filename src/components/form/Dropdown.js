@@ -1,13 +1,13 @@
 import React, { useContext, useEffect } from 'react'
 
-import { FormStoreContext } from './Form'
+import { FormContext } from './Form'
 
-export default function Dropdown({name='dropdown', placeholder="Select", divClassNames='', collection=[], defaultValue=0, selectClassNames=''}){
+export default function Dropdown({name='dropdown', placeholder="Select", collection=[], defaultValue=0, selectClassNames='', divClassNames='', required=true}){
 
-  const {setState, state, useRegisterWithFormContext} = useContext(FormStoreContext)
-  let value = state[name] ? state[name].value : 0
+  const {setState, state, useRegisterWithFormContext} = useContext(FormContext)
+  let value = state[name] ? state[name].value : defaultValue
 
-  useRegisterWithFormContext({defaultValue: 0, name, defaultApproval: false})
+  useRegisterWithFormContext({defaultValue: value, name, defaultApproval: !required})
 
   useEffect(() => {
     defaultValue !== 0 && setState({type: "UPDATE_STATE", name, payload: {value: defaultValue, approved: true}})

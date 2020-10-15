@@ -604,16 +604,6 @@ input[type="submit"]{
   background: transparent;
 }
 
-.nav-checkbox-custom {
-  position: absolute;
-  top: 1.25rem;
-  left: 4px;
-  height: 15px;
-  width: 15px;
-  border: 2px solid #48EB97;
-  background: transparent;
-}
-
 .checkmark:after {
   content: "";
   position: absolute;

@@ -21,7 +21,7 @@ export default function Filter({ submitFunctions=[] }){
   return (
     <div id="nav-filter">
       <Form render={(state) => {
-
+        console.log(state);
         function handleSubmit(e){
           e.preventDefault()
           submitFunctions.forEach(func => func())
@@ -53,6 +53,7 @@ export default function Filter({ submitFunctions=[] }){
           <form onSubmit={handleSubmit}>
             <div className={"flex-row flex-wrap w-100 space-between align-center mt1"}>
               <Checkbox
+                required={false}
                 defaultValue={urlSearchParams.get("location") ? urlSearchParams.get("location") === "online" : undefined}
                 labelText="ONLINE EVENTS"
                 name="online"
@@ -85,7 +86,7 @@ export default function Filter({ submitFunctions=[] }){
             </div>
             <div className={"flex-row flex-wrap space-between align-center mt1"}>
               <TextField
-                optional={true}
+                required={false}
                 name="location"
                 defaultValue={urlSearchParams.get("location") && urlSearchParams.get("location") !== "online" ? urlSearchParams.get("location") : undefined}
                 placeholder={(state.online && state.online.value) ? "SEARCHING ONLINE EVENTS" : "ADDRESS" }

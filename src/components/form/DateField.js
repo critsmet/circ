@@ -1,6 +1,6 @@
 import React, { useContext, useEffect } from 'react'
 
-import { FormStoreContext } from './Form'
+import { FormContext } from './Form'
 
 import Validators from '../../helpers/validators'
 
@@ -10,13 +10,13 @@ let todayMonth = today.getMonth() + 1 //JavaScript returns .getMonth() values 0-
 let todayDay = today.getDate()
 let todayHours = today.getHours()
 
-export default function DateField({name='date', labelText="Day", labelClassNames="", defaultYear=todayYear, defaultMonth=todayMonth, defaultDay=todayDay, minYear=todayYear, minMonth=todayMonth, minDay=todayDay, maxYear=(todayYear + 1), maxMonth=12, maxDay=31, divClassNames=''}){
+export default function DateField({name='date', labelText="Date", labelClassNames="", defaultYear=todayYear, defaultMonth=todayMonth, defaultDay=todayDay, minYear=todayYear, minMonth=todayMonth, minDay=todayDay, maxYear=(todayYear + 1), maxMonth=12, maxDay=31, selectClassNames='', divClassNames=''}){
 
-  const {setState, state, useRegisterWithFormContext} = useContext(FormStoreContext)
+  const {setState, state, useRegisterWithFormContext} = useContext(FormContext)
 
   //It's important to have this useEffect hook above the if statement below that will change the day to the next day if today is the minimum day and it's 11PM
   useEffect(() => {
-    setState({type: "UPDATE_STATE", name, payload: {value: {year: defaultYear, month: defaultMonth, day: defaultDay}, approved: true}})
+    setState({type: "UPDATE_STATE", name, payload: {value: {year: defaultYear, month: defaultMonth, day: defaultDay}}})
   }, [defaultYear, defaultMonth, defaultDay])
 
   let defaultValue = {}
@@ -58,15 +58,15 @@ export default function DateField({name='date', labelText="Day", labelClassNames
     //For example, if the current selected date is March 30, 2020, and then the month value changes to February, well obviously February 30 is not a valid date, so the date reconfigurer will change the day to the first valid day for the month
     //This will then get ultimately set as the new value
     let newDate = Validators.dateReconfigurer({changedValue, fieldName, ...validatorInfoObject, setState})
-    setState({type: 'UPDATE_STATE', name, payload: {value: newDate, approved: true}})
+    setState({type: 'UPDATE_STATE', name, payload: {value: newDate}})
   }
 
   return (
     <div className={divClassNames} id={name + "-date"}>
-      <select onChange={handleOnChange} name="year" value={year}>
+      <select className={selectClassNames} onChange={handleOnChange} name="year" value={year}>
         {makeYearOptions()}
       </select>
-      <select onChange={handleOnChange} name="month" value={month}>
+      <select lassName={selectClassNames} onChange={handleOnChange} name="month" value={month}>
         <option {...!Validators.monthValidator({...validatorInfoObject, monthInQuestion: 1}).pass && disabledObj } value={1}>JAN</option>
         <option {...!Validators.monthValidator({...validatorInfoObject, monthInQuestion: 2}).pass && disabledObj } value={2}>FEB</option>
         <option {...!Validators.monthValidator({...validatorInfoObject, monthInQuestion: 3}).pass && disabledObj } value={3}>MAR</option>
@@ -80,12 +80,9 @@ export default function DateField({name='date', labelText="Day", labelClassNames
         <option {...!Validators.monthValidator({...validatorInfoObject, monthInQuestion: 11}).pass && disabledObj } value={11}>NOV</option>
         <option {...!Validators.monthValidator({...validatorInfoObject, monthInQuestion: 12}).pass && disabledObj } value={12}>DEC</option>
       </select>
-      <select onChange={handleOnChange} name="day" value={day}>
+      <select lassName={selectClassNames} onChange={handleOnChange} name="day" value={day}>
         {Array.from(Array(31).keys()).map(num => <option key={num + "-day-option"} {...!Validators.dayValidator({...validatorInfoObject, dayInQuestion: num + 1}).pass  && disabledObj} value={num + 1}>{num + 1}</option>)}
       </select>
     </div>
   )
 }
-
-//FUTURE COMPONENT DEVELOPMENT
-//1. Add maximum date values, this would force us to refactor the dateReconfigurer as well

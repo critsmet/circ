@@ -1,16 +1,16 @@
 import React, { useContext, useEffect } from 'react'
 
-import { FormStoreContext } from './Form'
+import { FormContext } from './Form'
 
-export default function CheckboxCollection({name='select', labelText="", divClassNames='', collection=[], defaultValue=[], labelClassNames='', checkboxClassNames='', counterSpanClassNames='', limit=Infinity, counter=false, required=false}){
+export default function CheckboxCollection({name='checkbox-collection', containerLabelText="", containerLabelClassNames='', divClassNames='', collection=[], defaultValue=[], labelClassNames='', checkboxClassNames='', counter=false, counterSpanClassNames='', limit=Infinity, required=true}){
 
-  const {setState, state, useRegisterWithFormContext} = useContext(FormStoreContext)
+  const {setState, state, useRegisterWithFormContext} = useContext(FormContext)
   let value = state[name] ? state[name].value : []
 
   useRegisterWithFormContext({defaultValue: [], name, defaultApproval: !required})
 
   useEffect(() => {
-    setState({type: "UPDATE_STATE", name, payload: {value: defaultValue, approved: true}})
+    defaultValue.length > 0 && setState({type: "UPDATE_STATE", name, payload: {value: defaultValue, approved: true}})
   }, [defaultValue.length])
 
   let ids = collection.map(item => item.id)
@@ -49,7 +49,7 @@ export default function CheckboxCollection({name='select', labelText="", divClas
         setState({type: 'UPDATE_STATE', name, payload: {value: newValue, approved: true}})
       } else {
         let newValue = value.filter(num => num !== clickedCheckbox)
-        setState({type: 'UPDATE_STATE', name, payload: {value: newValue, approved: true}})
+        setState({type: 'UPDATE_STATE', name, payload: {value: newValue, approved: required && newValue.length === 0 ? false : true }})
       }
     }
   }
@@ -61,7 +61,7 @@ export default function CheckboxCollection({name='select', labelText="", divClas
 
   return (
     <div id={name+"checkbox-collection-container"}>
-      {labelText ? <label>{labelText}</label> : null}
+      {containerLabelText ? <label className={containerLabelClassNames}>{containerLabelText}</label> : null}
       <div id={name+"checkbox-collection-wrapper"} style={counter ? wrapperGutterStyle : null}>
         <div className={divClassNames} id={name + "-checkbox-collection"}>
           {makeCheckboxes()}

@@ -2,7 +2,7 @@ import React, { useContext, useEffect } from 'react'
 
 import Validators from '../../helpers/validators'
 
-import { FormStoreContext } from './Form'
+import { FormContext } from './Form'
 
 const today = new Date()
 const tomorrow = new Date(today.getTime() + (24 * 60 * 60 * 1000));
@@ -13,7 +13,7 @@ const todayHours = today.getHours()
 
 export default function TimeField({name='time', divClassNames='', labelText="Time", labelClassNames="", minDay=todayDay, minMonth=todayMonth, minYear=todayYear, maxDay=null, maxMonth=null, maxYear=null, selectedDay=todayDay, selectedMonth=todayMonth, selectedYear=todayYear, defaultHour=todayHours, defaultMinute=0}){
 
-  const {setState, state, useRegisterWithFormContext} = useContext(FormStoreContext)
+  const {setState, state, useRegisterWithFormContext} = useContext(FormContext)
   let value = state[name] ? state[name].value : {hours: ((defaultHour === todayHours) && (todayHours === 23)) ? 0 : defaultHour, minutes: defaultMinute }
   let {hours, minutes} = value
 
@@ -23,7 +23,7 @@ export default function TimeField({name='time', divClassNames='', labelText="Tim
   let validatorInfoObject= {selectedYear, minYear, selectedMonth, minMonth, selectedDay, minDay, maxYear, maxMonth, maxDay, selectedHour: hours, currentHour: todayHours}
 
   //This function makes sure that, if there's a minimum time that can be selected, the option is always one hour ahead.
-  //It will also take in the minimum day, if given, and if the minimum day is now tomorrow because it's 11PM, it will make sure that the Hour select starts at midnight. 
+  //It will also take in the minimum day, if given, and if the minimum day is now tomorrow because it's 11PM, it will make sure that the Hour select starts at midnight.
   function validateMinMaxValue(hrs){
     let hourIncrement = hrs
     while(!Validators.hourValidator({...validatorInfoObject, selectedDay: ((hours === 0) && (todayHours === 23)) ? tomorrow.getDate() : selectedDay, selectedHour: hourIncrement}).pass){

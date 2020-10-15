@@ -1,19 +1,21 @@
 import React, { useState, useContext, useEffect } from 'react'
 
-import { FormStoreContext } from './Form'
+import { FormContext } from './Form'
 
-export default function TagField({name='tags', divClassNames='', tagClassNames='', inputClassNames='', collectionClassNames='', counter=false, limit=Infinity, tagInputLimit=20, counterSpanClassNames, placeholder="Tags", defaultValue=[]}){
+export default function TagField({name='tags', placeholder="Tags", tagClassNames='', inputClassNames='', collectionClassNames='', counter=false, limit=Infinity, tagCharLimit=20, counterSpanClassNames='', divClassNames='', defaultValue=[], required=true}){
 
-  const {setState, state, useRegisterWithFormContext} = useContext(FormStoreContext)
+  const {setState, state, useRegisterWithFormContext} = useContext(FormContext)
   let value = state[name] ? state[name].value : []
 
-  useRegisterWithFormContext({defaultValue: value, name, defaultApproval: true})
+  useRegisterWithFormContext({defaultValue: value, name, defaultApproval: !required})
 
   let [tagState, setTagState] = useState('')
 
   useEffect(() => {
-    defaultValue.length > 0 && setTagState(' ')
-    setState({type: "UPDATE_STATE", name, payload: {value: defaultValue, approved: true}})
+    if (defaultValue.length > 0){
+      setTagState(' ')
+      setState({type: "UPDATE_STATE", name, payload: {value: defaultValue, approved: true}})
+    }
   }, [defaultValue.length])
 
 
@@ -37,7 +39,7 @@ export default function TagField({name='tags', divClassNames='', tagClassNames='
   function handleInputTag(e){
     let input = e.target.value
     //This if statement prevents values that are empty spaces, does not allow text to be entered if the limit of tags has been reached OR if the limit of the length of the tag has been reached, and it won't allow any characters besides letters and numbers
-    if (input === "  " || value.length === limit || input.length === tagInputLimit || (input !== "" && !input.replace(/ /g, "").match(/^[0-9a-zA-Z]+$/))){
+    if (input === "  " || value.length === limit || input.length === tagCharLimit || (input !== "" && !input.replace(/ /g, "").match(/^[0-9a-zA-Z]+$/))){
       return;
     } else {
       setTagState(input)
@@ -71,15 +73,10 @@ export default function TagField({name='tags', divClassNames='', tagClassNames='
       <div id={name+'-tag-collection-wrapper'}>
         <div id={name+"-tags-collection"} className={divClassNames}>
           {renderTags()}
-          <input id={name+"-tag-input"} onKeyDown={handleCompleteTag} onChange={handleInputTag} placeholder={value.length === 0 && placeholder} onBlur={(e) => handleCompleteTag(e, true)}value={tagState} className={inputClassNames} type="text"/>
+          <input id={name+"-tag-input"} onKeyDown={handleCompleteTag} onChange={handleInputTag} placeholder={value.length === 0 ? placeholder : ""} onBlur={(e) => handleCompleteTag(e, true)}value={tagState} className={inputClassNames} type="text"/>
         </div>
       </div>
       {(counter && renderTagCounter())}
     </div>
   )
 }
-
-//FUTURE COMPONENT DEVELOPMENT
-//1. The ability to click tags and delete them
-//2. The ability to arrow left and highlight + erase specific tags. Because the tag collection isn't actually an input field,
-//  the cursor doesn't reach in between tags. So creating the sensation of being able to use the keyboard arrow to highlight/select and delete a tag

@@ -1,21 +1,20 @@
 import React, { useContext, useEffect } from 'react'
 
-import { FormStoreContext } from './Form'
+import { FormContext } from './Form'
 
-export default function Checkbox({name='checkbox', labelText='', labelClassNames='', checkboxClassNames='', defaultValue=false, required=false}){
+export default function Checkbox({name='checkbox', labelText=null, labelClassNames='', checkboxClassNames='', defaultValue=false, required=true}){
 
-  const {setState, state, useRegisterWithFormContext} = useContext(FormStoreContext)
+  const {setState, state, useRegisterWithFormContext} = useContext(FormContext)
   let value = state[name] ? state[name].value : defaultValue
-  let approved = state[name] ? state[name].approved : !required
 
   useRegisterWithFormContext({defaultValue: value, name, defaultApproval: !required})
-  
+
   useEffect(() => {
-    defaultValue && setState({type: "UPDATE_STATE", name, payload: {value: defaultValue, approved: true}})
+    setState({type: "UPDATE_STATE", name, payload: {value: defaultValue, approved: required ? defaultValue : true}})
   }, [defaultValue])
 
   function handleOnChange(){
-    setState({type: "UPDATE_STATE", name, payload: {value: !value, approved: !required ? true : !approved}})
+    setState({type: "UPDATE_STATE", name, payload: {value: !value, approved: required ? defaultValue : true}})
   }
 
   return (
@@ -24,7 +23,6 @@ export default function Checkbox({name='checkbox', labelText='', labelClassNames
         type="checkbox"
         checked={value}
         onChange={handleOnChange}
-        className={labelClassNames}
       />
         <span className={checkboxClassNames}></span>
         <span>{labelText || name}</span>

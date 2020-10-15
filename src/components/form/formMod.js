@@ -6,7 +6,6 @@ export const stateObjTemplate = {value: null, approved: false, errors: []}
 
 export function formReducer(state={}, action){
   switch (action.type){
-
     case 'UPDATE_STATE':
       return {...state, [action.name]: {...state[action.name], ...action.payload}}
     case 'ADD_FIELD':
